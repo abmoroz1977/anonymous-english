@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анонимный английский (Gemini Powered)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background-color: #4B5563; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 p-2 rounded-lg text-white">
+                <i class="fa-solid fa-graduation-cap text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight">Анонимный английский</h1>
+                <p class="text-xs text-slate-400">Powered by Google Gemini API</p>
+            </div>
+        </div>
+        <button id="openSettings" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition">
+            <i class="fa-solid fa-gear"></i>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col gap-4">
+
+        <!-- Controls Bar -->
+        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-wrap gap-3 items-center justify-between text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-400">Scenario:</span>
+                <select id="scenarioSelect" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                    <option value="business">💼 Business & Economics</option>
+                    <option value="interview">🎯 Job Interview Practice</option>
+                    <option value="grammar">🩺 Grammar & Error Clinic</option>
+                    <option value="casual">☕ Casual Conversation</option>
+                </select>
+            </div>
+
+            <!-- Voice Speed Control -->
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-400"><i class="fa-solid fa-gauge mr-1"></i> Speed:</span>
+                <select id="speedSelect" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500">
+                    <option value="0.7">0.7x (Very Slow)</option>
+                    <option value="0.8">0.8x (Slow)</option>
+                    <option value="1.0" selected>1.0x (Normal)</option>
+                    <option value="1.2">1.2x (Fast)</option>
+                    <option value="1.4">1.4x (Faster)</option>
+                </select>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <label class="flex items-center cursor-pointer space-x-2">
+                    <input type="checkbox" id="autoTtsToggle" checked class="sr-only peer">
+                    <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 relative"></div>
+                    <span class="text-xs text-slate-300"><i class="fa-solid fa-volume-high mr-1"></i> Auto Voice</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chatBox" class="flex-1 bg-slate-800/50 border border-slate-700/80 rounded-2xl p-4 overflow-y-auto chat-scroll flex flex-col gap-4 min-h-[380px] max-h-[550px]">
+            <div class="flex gap-3 max-w-[85%]">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">AI</div>
+                <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700 text-sm leading-relaxed flex flex-col gap-2">
+                    <div>Hello! Welcome to <b>Анонимный английский</b>. Enter your <b>Gemini API Key</b> in settings (top right), select your voice speed, and click the mic to speak!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center gap-2">
+            <button id="micBtn" class="w-12 h-12 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition flex-shrink-0 text-lg">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            
+            <input type="text" id="userInput" placeholder="Type a message or click the mic to speak..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+            
+            <button id="sendBtn" class="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition flex-shrink-0">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-sliders mr-2 text-indigo-400"></i> Settings</h3>
+                <button id="closeSettings" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Google Gemini API Key</label>
+                <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Model Selection</label>
+                <select id="modelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <option value="gemini-3.8-flash">gemini-3.8-flash (Recommended)</option>
+                    <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                </select>
+            </div>
+
+            <button id="saveSettings" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-lg font-medium text-sm transition mt-2">
+                Save & Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = {
+            business: "You are a professional business English tutor. Focus on professional vocabulary, spreadsheet/data analysis terms, and workplace communication. Correct mistakes briefly and ask follow-up questions.",
+            interview: "You are an interviewer conducting a job interview in English. Ask realistic interview questions, point out awkward phrases, and suggest better alternatives.",
+            grammar: "You are a strict but helpful grammar coach. Carefully analyze every user sentence, correct grammar/preposition/tense errors explicitly, and explain the rule.",
+            casual: "You are a friendly English conversation partner. Keep discussions natural, casual, and engaging while fixing major errors."
+        };
+
+        let apiKey = localStorage.getItem("gemini_key") || "";
+        let currentModel = localStorage.getItem("gemini_model") || "gemini-3.8-flash";
+        let history = [];
+        let isRecording = false;
+        let recognition = null;
+
+        const chatBox = document.getElementById("chatBox");
+        const userInput = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const micBtn = document.getElementById("micBtn");
+        const scenarioSelect = document.getElementById("scenarioSelect");
+        const speedSelect = document.getElementById("speedSelect");
+        const autoTtsToggle = document.getElementById("autoTtsToggle");
+        const settingsModal = document.getElementById("settingsModal");
+        const openSettings = document.getElementById("openSettings");
+        const closeSettings = document.getElementById("closeSettings");
+        const saveSettings = document.getElementById("saveSettings");
+        const apiKeyInput = document.getElementById("apiKeyInput");
+        const modelSelect = document.getElementById("modelSelect");
+
+        apiKeyInput.value = apiKey;
+        modelSelect.value = currentModel;
+
+        openSettings.onclick = () => settingsModal.classList.remove("hidden");
+        closeSettings.onclick = () => settingsModal.classList.add("hidden");
+        saveSettings.onclick = () => {
+            apiKey = apiKeyInput.value.trim();
+            currentModel = modelSelect.value;
+            localStorage.setItem("gemini_key", apiKey);
+            localStorage.setItem("gemini_model", currentModel);
+            settingsModal.classList.add("hidden");
+        };
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onresult = (e) => {
+                const text = e.results[0][0].transcript;
+                userInput.value = text;
+                stopRecording();
+                sendMessage();
+            };
+
+            recognition.onerror = () => stopRecording();
+            recognition.onend = () => stopRecording();
+        } else {
+            micBtn.style.display = "none";
+        }
+
+        micBtn.onclick = () => {
+            if (!recognition) return;
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        };
+
+        function startRecording() {
+            isRecording = true;
+            micBtn.classList.remove("bg-slate-700");
+            micBtn.classList.add("bg-red-600", "animate-pulse");
+            recognition.start();
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            micBtn.classList.remove("bg-red-600", "animate-pulse");
+            micBtn.classList.add("bg-slate-700");
+            if (recognition) recognition.stop();
+        }
+
+        sendBtn.onclick = sendMessage;
+        userInput.onkeydown = (e) => { if (e.key === "Enter") sendMessage(); };
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            if (!apiKey) {
+                alert("Please click settings (top right) and enter your Gemini API Key.");
+                settingsModal.classList.remove("hidden");
+                return;
+            }
+
+            appendMessage("user", text);
+            userInput.value = "";
+
+            const systemPrompt = scenarios[scenarioSelect.value];
+            history.push({ role: "user", parts: [{ text }] });
+
+            const payload = {
+                system_instruction: { parts: [{ text: systemPrompt }] },
+                contents: history
+            };
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    appendMessage("ai", `⚠️ Error: ${data.error.message}`);
+                    return;
+                }
+
+                const aiReply = data.candidates[0].content.parts[0].text;
+                history.push({ role: "model", parts: [{ text: aiReply }] });
+
+                appendMessage("ai", aiReply);
+
+                if (autoTtsToggle.checked) {
+                    speakText(aiReply);
+                }
+
+            } catch (err) {
+                appendMessage("ai", "⚠️ Failed to connect to Gemini API. Check console or API key.");
+            }
+        }
+
+        function appendMessage(role, text) {
+            const wrapper = document.createElement("div");
+            wrapper.className = `flex gap-3 max-w-[85%] ${role === 'user' ? 'ml-auto flex-row-reverse' : ''}`;
+
+            const avatar = document.createElement("div");
+            avatar.className = `w-8 h-8 rounded-full ${role === 'user' ? 'bg-indigo-500' : 'bg-indigo-600'} flex items-center justify-center text-xs font-bold flex-shrink-0`;
+            avatar.innerText = role === 'user' ? 'YOU' : 'AI';
+
+            const bubble = document.createElement("div");
+            bubble.className = `p-4 rounded-2xl border text-sm leading-relaxed flex flex-col gap-2 ${
+                role === 'user' 
+                ? 'bg-indigo-600 text-white border-indigo-500 rounded-tr-none' 
+                : 'bg-slate-800 border-slate-700 rounded-tl-none'
+            }`;
+
+            const textDiv = document.createElement("div");
+            textDiv.innerText = text;
+            bubble.appendChild(textDiv);
+
+            if (role === 'ai') {
+                const repeatBtn = document.createElement("button");
+                repeatBtn.className = "self-start mt-1 px-2.5 py-1 bg-slate-700/80 hover:bg-slate-600 text-slate-300 rounded-lg text-xs flex items-center gap-1.5 transition border border-slate-600";
+                repeatBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Repeat';
+                repeatBtn.onclick = () => speakText(text);
+                bubble.appendChild(repeatBtn);
+            }
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubble);
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                
+                const cleanText = text
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/#/g, '')
+                    .replace(/`/g, '')
+                    .replace(/_/g, '');
+
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'en-US';
+                utterance.rate = parseFloat(speedSelect.value) || 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>
