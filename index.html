@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Анонимный английский (Gemini Powered)</title>
+    <title>Анонимный английский</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -70,7 +70,7 @@
             <div class="flex gap-3 max-w-[85%]">
                 <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">AI</div>
                 <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700 text-sm leading-relaxed flex flex-col gap-2">
-                    <div>Hello! Welcome to <b>Анонимный английский</b>. Enter your <b>Gemini API Key</b> in settings (top right), select your voice speed, and click the mic to speak!</div>
+                    <div>Hello! Welcome to <b>Анонимный английский</b>. Select your preferred scenario, choose your voice speed, and click the mic to start speaking right away!</div>
                 </div>
             </div>
         </div>
@@ -99,11 +99,6 @@
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Google Gemini API Key</label>
-                <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
-            </div>
-
-            <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1">Model Selection</label>
                 <select id="modelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
                     <option value="gemini-3.8-flash">gemini-3.8-flash (Recommended)</option>
@@ -125,7 +120,6 @@
             casual: "You are a friendly English conversation partner. Keep discussions natural, casual, and engaging while fixing major errors."
         };
 
-        let apiKey = localStorage.getItem("gemini_key") || "";
         let currentModel = localStorage.getItem("gemini_model") || "gemini-3.8-flash";
         let history = [];
         let isRecording = false;
@@ -142,18 +136,14 @@
         const openSettings = document.getElementById("openSettings");
         const closeSettings = document.getElementById("closeSettings");
         const saveSettings = document.getElementById("saveSettings");
-        const apiKeyInput = document.getElementById("apiKeyInput");
         const modelSelect = document.getElementById("modelSelect");
 
-        apiKeyInput.value = apiKey;
         modelSelect.value = currentModel;
 
         openSettings.onclick = () => settingsModal.classList.remove("hidden");
         closeSettings.onclick = () => settingsModal.classList.add("hidden");
         saveSettings.onclick = () => {
-            apiKey = apiKeyInput.value.trim();
             currentModel = modelSelect.value;
-            localStorage.setItem("gemini_key", apiKey);
             localStorage.setItem("gemini_model", currentModel);
             settingsModal.classList.add("hidden");
         };
@@ -207,36 +197,28 @@
             const text = userInput.value.trim();
             if (!text) return;
 
-            if (!apiKey) {
-                alert("Please click settings (top right) and enter your Gemini API Key.");
-                settingsModal.classList.remove("hidden");
-                return;
-            }
-
             appendMessage("user", text);
             userInput.value = "";
 
             const systemPrompt = scenarios[scenarioSelect.value];
             history.push({ role: "user", parts: [{ text }] });
 
-            const payload = {
-                system_instruction: { parts: [{ text: systemPrompt }] },
-                contents: history
-            };
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
-
             try {
-                const res = await fetch(apiUrl, {
+                // Запрос отправляется на наш бэкенд на Vercel
+                const res = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        model: currentModel,
+                        system_instruction: { parts: [{ text: systemPrompt }] },
+                        contents: history
+                    })
                 });
 
                 const data = await res.json();
 
                 if (data.error) {
-                    appendMessage("ai", `⚠️ Error: ${data.error.message}`);
+                    appendMessage("ai", `⚠️ Error: ${data.error.message || data.error}`);
                     return;
                 }
 
@@ -250,7 +232,7 @@
                 }
 
             } catch (err) {
-                appendMessage("ai", "⚠️ Failed to connect to Gemini API. Check console or API key.");
+                appendMessage("ai", "⚠️ Failed to connect to API server.");
             }
         }
 
