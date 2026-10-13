@@ -203,8 +203,13 @@
             const systemPrompt = scenarios[scenarioSelect.value];
             history.push({ role: "user", parts: [{ text }] });
 
+            // Показываем индикатор загрузки (спиннер)
+            const loadingIndicator = showLoading();
+
+            // Блокируем кнопки на время загрузки
+            setLoadingState(true);
+
             try {
-                // Запрос отправляется на наш бэкенд на Vercel
                 const res = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -216,6 +221,9 @@
                 });
 
                 const data = await res.json();
+
+                // Удаляем индикатор загрузки
+                loadingIndicator.remove();
 
                 if (data.error) {
                     appendMessage("ai", `⚠️ Error: ${data.error.message || data.error}`);
@@ -232,7 +240,44 @@
                 }
 
             } catch (err) {
+                loadingIndicator.remove();
                 appendMessage("ai", "⚠️ Failed to connect to API server.");
+            } finally {
+                // Разблокируем кнопки
+                setLoadingState(false);
+            }
+        }
+
+        function showLoading() {
+            const wrapper = document.createElement("div");
+            wrapper.id = "loadingIndicator";
+            wrapper.className = "flex gap-3 max-w-[85%]";
+
+            wrapper.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">AI</div>
+                <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700 text-sm flex items-center gap-2 text-slate-400">
+                    <i class="fa-solid fa-circle-notch fa-spin text-indigo-400 text-base"></i>
+                    <span>Thinking...</span>
+                </div>
+            `;
+
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return wrapper;
+        }
+
+        function setLoadingState(isLoading) {
+            sendBtn.disabled = isLoading;
+            userInput.disabled = isLoading;
+            micBtn.disabled = isLoading;
+            
+            if (isLoading) {
+                sendBtn.classList.add("opacity-50", "cursor-not-allowed");
+                userInput.classList.add("opacity-50");
+            } else {
+                sendBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                userInput.classList.remove("opacity-50");
+                userInput.focus();
             }
         }
 
@@ -286,9 +331,6 @@
                 window.speechSynthesis.speak(utterance);
             }
         }
-    </script>
-</body>
-</html>
     </script>
 </body>
 </html>
