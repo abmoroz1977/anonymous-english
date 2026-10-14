@@ -30,63 +30,115 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col gap-4">
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 flex flex-col lg:flex-row gap-6">
 
-        <!-- Controls Bar -->
-        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-wrap gap-3 items-center justify-between text-sm">
-            <div class="flex items-center space-x-2">
-                <span class="text-slate-400">Scenario:</span>
-                <select id="scenarioSelect" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500">
-                    <option value="business">💼 Business & Economics</option>
-                    <option value="interview">🎯 Job Interview Practice</option>
-                    <option value="grammar">🩺 Grammar & Error Clinic</option>
-                    <option value="casual">☕ Casual Conversation</option>
-                </select>
-            </div>
+        <!-- Left Sidebar: Topic Selector & Controls -->
+        <aside class="w-full lg:w-72 flex flex-col gap-4 flex-shrink-0">
+            
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col gap-3">
+                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                    <i class="fa-solid fa-layer-group mr-1.5 text-indigo-400"></i> Выберите тему
+                </h2>
 
-            <!-- Voice Speed Control -->
-            <div class="flex items-center space-x-2">
-                <span class="text-slate-400"><i class="fa-solid fa-gauge mr-1"></i> Speed:</span>
-                <select id="speedSelect" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500">
-                    <option value="0.7">0.7x (Very Slow)</option>
-                    <option value="0.8">0.8x (Slow)</option>
-                    <option value="1.0" selected>1.0x (Normal)</option>
-                    <option value="1.2">1.2x (Fast)</option>
-                    <option value="1.4">1.4x (Faster)</option>
-                </select>
-            </div>
+                <!-- Topic Buttons Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5" id="scenarioGroup">
+                    <button data-value="business" class="scenario-btn active p-3 rounded-xl border border-indigo-500 bg-indigo-600/20 hover:bg-indigo-600/30 text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-600/40 flex items-center justify-center text-indigo-300 flex-shrink-0">
+                            <i class="fa-solid fa-briefcase text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-sm">Business & Economics</div>
+                            <div class="text-xs text-slate-400">Финансы, отчеты, работа</div>
+                        </div>
+                    </button>
 
-            <div class="flex items-center space-x-4">
-                <label class="flex items-center cursor-pointer space-x-2">
-                    <input type="checkbox" id="autoTtsToggle" checked class="sr-only peer">
-                    <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 relative"></div>
-                    <span class="text-xs text-slate-300"><i class="fa-solid fa-volume-high mr-1"></i> Auto Voice</span>
-                </label>
-            </div>
-        </div>
+                    <button data-value="interview" class="scenario-btn p-3 rounded-xl border border-slate-700 bg-slate-900/50 hover:bg-slate-700/50 text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300 flex-shrink-0">
+                            <i class="fa-solid fa-user-tie text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-sm">Job Interview</div>
+                            <div class="text-xs text-slate-400">Собеседование и вопросы</div>
+                        </div>
+                    </button>
 
-        <!-- Chat Area -->
-        <div id="chatBox" class="flex-1 bg-slate-800/50 border border-slate-700/80 rounded-2xl p-4 overflow-y-auto chat-scroll flex flex-col gap-4 min-h-[380px] max-h-[550px]">
-            <div class="flex gap-3 max-w-[85%]">
-                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">AI</div>
-                <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700 text-sm leading-relaxed flex flex-col gap-2">
-                    <div>Hello! Welcome to <b>Анонимный английский</b>. Select your preferred scenario, choose your voice speed, and click the mic to start speaking right away!</div>
+                    <button data-value="grammar" class="scenario-btn p-3 rounded-xl border border-slate-700 bg-slate-900/50 hover:bg-slate-700/50 text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300 flex-shrink-0">
+                            <i class="fa-solid fa-spell-check text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-sm">Grammar Clinic</div>
+                            <div class="text-xs text-slate-400">Разбор и исправление ошибок</div>
+                        </div>
+                    </button>
+
+                    <button data-value="casual" class="scenario-btn p-3 rounded-xl border border-slate-700 bg-slate-900/50 hover:bg-slate-700/50 text-left transition flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300 flex-shrink-0">
+                            <i class="fa-solid fa-mug-hot text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-sm">Casual Chat</div>
+                            <div class="text-xs text-slate-400">Разговор на свободные темы</div>
+                        </div>
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Input Area -->
-        <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center gap-2">
-            <button id="micBtn" class="w-12 h-12 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition flex-shrink-0 text-lg">
-                <i class="fa-solid fa-microphone"></i>
-            </button>
-            
-            <input type="text" id="userInput" placeholder="Type a message or click the mic to speak..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-            
-            <button id="sendBtn" class="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition flex-shrink-0">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
+            <!-- Voice Controls Block -->
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col gap-3 text-sm">
+                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <i class="fa-solid fa-sliders mr-1.5 text-indigo-400"></i> Настройки озвучки
+                </h2>
+
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-300"><i class="fa-solid fa-gauge mr-1 text-slate-400"></i> Скорость:</span>
+                    <select id="speedSelect" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+                        <option value="0.7">0.7x (Very Slow)</option>
+                        <option value="0.8">0.8x (Slow)</option>
+                        <option value="1.0" selected>1.0x (Normal)</option>
+                        <option value="1.2">1.2x (Fast)</option>
+                        <option value="1.4">1.4x (Faster)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center justify-between pt-1 border-t border-slate-700/60">
+                    <span class="text-slate-300"><i class="fa-solid fa-volume-high mr-1 text-slate-400"></i> Авто-голос:</span>
+                    <label class="flex items-center cursor-pointer space-x-2">
+                        <input type="checkbox" id="autoTtsToggle" checked class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 relative"></div>
+                    </label>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Right Side: Chat & Input Area -->
+        <section class="flex-1 flex flex-col gap-4 min-h-[500px]">
+
+            <!-- Chat Box -->
+            <div id="chatBox" class="flex-1 bg-slate-800/50 border border-slate-700/80 rounded-2xl p-4 overflow-y-auto chat-scroll flex flex-col gap-4 min-h-[420px] max-h-[600px]">
+                <div class="flex gap-3 max-w-[85%]">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">AI</div>
+                    <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700 text-sm leading-relaxed flex flex-col gap-2">
+                        <div>Hello! Welcome to <b>Анонимный английский</b>. Choose a topic on the left, select your preferred speed, and click the mic to start speaking!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center gap-2">
+                <button id="micBtn" class="w-12 h-12 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center justify-center transition flex-shrink-0 text-lg">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                
+                <input type="text" id="userInput" placeholder="Type a message or click the mic to speak..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                
+                <button id="sendBtn" class="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition flex-shrink-0">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+
+        </section>
 
     </main>
 
@@ -120,6 +172,7 @@
             casual: "You are a friendly English conversation partner. Keep discussions natural, casual, and engaging while fixing major errors."
         };
 
+        let selectedScenario = "business";
         let currentModel = localStorage.getItem("gemini_model") || "gemini-3.8-flash";
         let history = [];
         let isRecording = false;
@@ -129,7 +182,6 @@
         const userInput = document.getElementById("userInput");
         const sendBtn = document.getElementById("sendBtn");
         const micBtn = document.getElementById("micBtn");
-        const scenarioSelect = document.getElementById("scenarioSelect");
         const speedSelect = document.getElementById("speedSelect");
         const autoTtsToggle = document.getElementById("autoTtsToggle");
         const settingsModal = document.getElementById("settingsModal");
@@ -139,6 +191,27 @@
         const modelSelect = document.getElementById("modelSelect");
 
         modelSelect.value = currentModel;
+
+        // Переключение сценариев кликом по кнопкам
+        document.querySelectorAll(".scenario-btn").forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll(".scenario-btn").forEach(b => {
+                    b.classList.remove("active", "border-indigo-500", "bg-indigo-600/20");
+                    b.classList.add("border-slate-700", "bg-slate-900/50");
+                    const iconBox = b.querySelector("div");
+                    iconBox.classList.remove("bg-indigo-600/40", "text-indigo-300");
+                    iconBox.classList.add("bg-slate-700", "text-slate-300");
+                });
+
+                btn.classList.add("active", "border-indigo-500", "bg-indigo-600/20");
+                btn.classList.remove("border-slate-700", "bg-slate-900/50");
+                const activeIconBox = btn.querySelector("div");
+                activeIconBox.classList.add("bg-indigo-600/40", "text-indigo-300");
+                activeIconBox.classList.remove("bg-slate-700", "text-slate-300");
+
+                selectedScenario = btn.dataset.value;
+            };
+        });
 
         openSettings.onclick = () => settingsModal.classList.remove("hidden");
         closeSettings.onclick = () => settingsModal.classList.add("hidden");
@@ -200,13 +273,10 @@
             appendMessage("user", text);
             userInput.value = "";
 
-            const systemPrompt = scenarios[scenarioSelect.value];
+            const systemPrompt = scenarios[selectedScenario];
             history.push({ role: "user", parts: [{ text }] });
 
-            // Показываем индикатор загрузки (спиннер)
             const loadingIndicator = showLoading();
-
-            // Блокируем кнопки на время загрузки
             setLoadingState(true);
 
             try {
@@ -221,8 +291,6 @@
                 });
 
                 const data = await res.json();
-
-                // Удаляем индикатор загрузки
                 loadingIndicator.remove();
 
                 if (data.error) {
@@ -243,7 +311,6 @@
                 loadingIndicator.remove();
                 appendMessage("ai", "⚠️ Failed to connect to API server.");
             } finally {
-                // Разблокируем кнопки
                 setLoadingState(false);
             }
         }
